@@ -135,8 +135,13 @@ if submit:
 
     # -------- Prediction --------
     proba = model.predict_proba(X)[0][1]
-    prediction = model.predict(X)[0]
-    result = label_encoder.inverse_transform([prediction])[0]
+    prediction = model.predict(input_df)[0]
+    prediction_proba = model.predict_proba(input_df)[0][1]
+    result = "Approved" if prediction == 1 else "Rejected"
+
+    st.success(f"Insurance Status: {result}")
+    st.write(f"Approval Probability: {prediction_proba*100:.2f}%")
+    
 
     # ----------------------------
     # Display Result
