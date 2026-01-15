@@ -9,7 +9,7 @@ from io import BytesIO
 # ----------------------------
 # 1️⃣ Load saved model
 # ----------------------------
-model_pipeline = joblib.load("C:/Users/ADMIN/Desktop/Insurance Status Classification Project/Insurance-Status-Classification-/insurance_gb_pipeline.pkl")
+model_pipeline = joblib.load('insurance_gb_pipeline.pkl')
 
 
 # ----------------------------
