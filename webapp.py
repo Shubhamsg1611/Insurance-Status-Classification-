@@ -1,11 +1,22 @@
 # ----------------------------
-# app.py
+# webapp.py
 # ----------------------------
+
 import streamlit as st
 import pandas as pd
 import joblib
 from fpdf import FPDF
 from io import BytesIO
+
+# ----------------------------
+# Required imports for pipeline
+# ----------------------------
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+from sklearn.ensemble import HistGradientBoostingClassifier
+from imblearn.pipeline import Pipeline as ImbPipeline
+from imblearn.over_sampling import ADASYN
 
 # ----------------------------
 # 1️⃣ Load the saved pipeline
