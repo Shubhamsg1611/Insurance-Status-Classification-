@@ -135,8 +135,8 @@ if submit:
 
     # -------- Prediction --------
     proba = model.predict_proba(X)[0][1]
-    prediction = model.predict(input_df)[0]
-    prediction_proba = model.predict_proba(input_df)[0][1]
+    prediction = model_pipeline.predict(input_df)[0]
+    prediction_proba = model_pipeline.predict_proba(input_df)[0][1]
     result = "Approved" if prediction == 1 else "Rejected"
 
     st.success(f"Insurance Status: {result}")
