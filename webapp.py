@@ -1,117 +1,146 @@
-# app.py
+# webapp.py
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
 from fpdf import FPDF
 from io import BytesIO
 
 # ----------------------------
-# 1️⃣ Load saved model
+# 1️⃣ Load Model
 # ----------------------------
-model_pipeline = joblib.load('insurance_gb_pipeline.pkl')
-
-
-# ----------------------------
-# 2️⃣ App Title
-# ----------------------------
-st.title("Insurance Status Prediction & PDF Report")
-st.write("Enter customer details to predict insurance eligibility and download report.")
+model_pipeline = joblib.load("insurance_gb_pipeline.pkl")
 
 # ----------------------------
-# 3️⃣ User Inputs
+# 2️⃣ App Branding (UI)
+# ----------------------------
+st.markdown(
+    """
+    <div style="text-align:center;">
+        <h1>Sahakar Insurance PVT. Ltd</h1>
+        <h4>Insurance Eligibility Prediction System</h4>
+        <hr style="border:1px solid #ddd;">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+st.write("Enter customer details to predict insurance status and download an official report.")
+
+# ----------------------------
+# 3️⃣ User Input Form
 # ----------------------------
 with st.form("input_form"):
+    st.subheader("Customer Information")
     customer_name = st.text_input("Customer Name")
-    
+
     st.subheader("Demographics")
-    age = st.number_input("Age", min_value=18, max_value=100, value=30)
+    age = st.number_input("Age", 18, 100, 30)
     gender = st.selectbox("Gender", ["Male", "Female"])
     marital_status = st.selectbox("Marital Status", ["Single", "Married", "Divorced"])
-    dependents = st.number_input("Number of Dependents", min_value=0, max_value=10, value=0)
+    dependents = st.number_input("Number of Dependents", 0, 10, 0)
     location = st.selectbox("Location", ["Urban", "Semi-Urban", "Rural"])
-    
-    st.subheader("Financials")
+
+    st.subheader("Financial Details")
     income = st.number_input("Annual Income", min_value=1000, value=50000)
-    premium = st.number_input("Premium Paid", min_value=100, value=5000)
-    policy_tenure = st.number_input("Policy Tenure (Years)", min_value=0, value=1)
-    
+    premium = st.number_input("Premium Amount", min_value=100, value=5000)
+    policy_tenure = st.number_input("Policy Tenure (Years)", 0, 50, 1)
+
     st.subheader("Health & Lifestyle")
-    bmi = st.number_input("BMI", min_value=10.0, max_value=50.0, value=22.0)
+    bmi = st.number_input("BMI", 10.0, 50.0, 22.0)
     chronic_condition = st.selectbox("Chronic Condition", ["Yes", "No"])
     exercise = st.selectbox("Exercise", ["Yes", "No"])
     alcohol = st.selectbox("Alcohol Consumption", ["Yes", "No"])
-    claims_count = st.number_input("Number of Claims", min_value=0, value=0)
-    
+    claims_count = st.number_input("Previous Claims Count", 0, 20, 0)
+
     submitted = st.form_submit_button("Predict & Generate PDF")
 
 # ----------------------------
-# 4️⃣ Prediction & PDF
+# 4️⃣ Prediction
 # ----------------------------
 if submitted:
-    # Create dataframe for model
+    if customer_name.strip() == "":
+        st.warning("Please enter Customer Name.")
+        st.stop()
+
+    # RAW features ONLY (must match training data)
     input_df = pd.DataFrame({
-        'Age': [age],
-        'Gender': [gender],
-        'Marital_Status': [marital_status],
-        'Dependents': [dependents],
-        'Location': [location],
-        'Income': [income],
-        'Premium': [premium],
-        'Policy_Tenure': [policy_tenure],
-        'BMI': [bmi],
-        'Chronic_Condition': [chronic_condition],
-        'Exercise': [exercise],
-        'Alcohol_Consumption': [alcohol],
-        'Claims_Count': [claims_count]
+        "Age": [age],
+        "Gender": [gender],
+        "Marital_Status": [marital_status],
+        "Dependents": [dependents],
+        "Location": [location],
+        "Income": [income],
+        "Premium": [premium],
+        "Policy_Tenure": [policy_tenure],
+        "BMI": [bmi],
+        "Chronic_Condition": [chronic_condition],
+        "Exercise": [exercise],
+        "Alcohol_Consumption": [alcohol],
+        "Claims_Count": [claims_count]
     })
-    
-    # Feature engineering
-    input_df['Income_Premium_Ratio'] = input_df['Income'] / (input_df['Premium'] + 1)
-    input_df['Claim_Frequency'] = input_df['Claims_Count'] / (input_df['Policy_Tenure'] + 1)
-    input_df['Chronic_Condition_Num'] = input_df['Chronic_Condition'].map({'Yes':1,'No':0})
-    input_df['Risk_Score'] = 0.4*input_df['Age'] + 0.3*input_df['BMI'] + 0.3*input_df['Chronic_Condition_Num']*100
-    
-    # Prediction
-    pred_proba = model_pipeline.predict_proba(input_df)[0][1]
+
+    # Model prediction
     pred_class = model_pipeline.predict(input_df)[0]
-    
-    st.subheader("Prediction Results")
-    st.write(f"**Customer Name:** {customer_name}")
-    st.write(f"**Predicted Insurance Status:** {pred_class}")
-    st.write(f"**Probability of Approval:** {pred_proba*100:.2f}%")
-    st.write(f"**Risk Score:** {input_df['Risk_Score'].values[0]:.2f}")
-    
+    pred_proba = model_pipeline.predict_proba(input_df)[0][1]
+
+    # Human-readable label
+    status_label = "Approved ✅" if pred_class == 1 else "Rejected ❌"
+
+    # Risk score (for display only)
+    risk_score = 0.4 * age + 0.3 * bmi + (30 if chronic_condition == "Yes" else 0)
+
     # ----------------------------
-    # 5️⃣ Generate PDF
+    # 5️⃣ Display Result
+    # ----------------------------
+    st.subheader("Prediction Result")
+    st.write(f"**Customer Name:** {customer_name}")
+    st.write(f"**Insurance Status:** {status_label}")
+    st.write(f"**Approval Probability:** {pred_proba * 100:.2f}%")
+    st.write(f"**Risk Score:** {risk_score:.2f}")
+
+    # ----------------------------
+    # 6️⃣ Generate PDF
     # ----------------------------
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", 'B', 16)
-    pdf.cell(0, 10, "Insurance Prediction Report", ln=True, align='C')
-    pdf.ln(10)
-    
-    pdf.set_font("Arial", '', 12)
+
+    # Header
+    pdf.set_font("Arial", "B", 18)
+    pdf.cell(0, 10, "Sahakar Insurance PVT. Ltd", ln=True, align="C")
+
+    pdf.set_font("Arial", "", 12)
+    pdf.cell(0, 8, "Insurance Eligibility Prediction Report", ln=True, align="C")
+
+    pdf.ln(6)
+    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+    pdf.ln(8)
+
+    # Report Content
+    pdf.set_font("Arial", "", 12)
     pdf.cell(0, 8, f"Customer Name: {customer_name}", ln=True)
-    
-    pdf.cell(0, 8, f"Predicted Insurance Status: {pred_class}", ln=True)
-    pdf.cell(0, 8, f"Probability of Approval: {pred_proba*100:.2f}%", ln=True)
-    pdf.cell(0, 8, f"Risk Score: {input_df['Risk_Score'].values[0]:.2f}", ln=True)
+    pdf.cell(0, 8, f"Insurance Status: {status_label}", ln=True)
+    pdf.cell(0, 8, f"Approval Probability: {pred_proba * 100:.2f}%", ln=True)
+    pdf.cell(0, 8, f"Risk Score: {risk_score:.2f}", ln=True)
+
     pdf.ln(5)
-    
-    pdf.cell(0, 8, "Customer Inputs:", ln=True)
-    for col in ['Age','Gender','Marital_Status','Dependents','Location','Income','Premium',
-                'Policy_Tenure','BMI','Chronic_Condition','Exercise','Alcohol_Consumption','Claims_Count']:
-        pdf.cell(0, 8, f"{col}: {input_df[col].values[0]}", ln=True)
-    
-    # Save PDF to BytesIO
+    pdf.cell(0, 8, "Customer Details:", ln=True)
+
+    for col in input_df.columns:
+        pdf.cell(0, 8, f"{col}: {input_df[col].iloc[0]}", ln=True)
+
+    # Footer
+    pdf.ln(10)
+    pdf.set_font("Arial", "I", 10)
+    pdf.cell(0, 8, "Generated by Sahakar Insurance PVT. Ltd", ln=True, align="C")
+
+    # Convert to bytes
     pdf_buffer = BytesIO()
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
-    
+
     st.download_button(
-        label="Download PDF Report",
+        "Download PDF Report",
         data=pdf_buffer,
         file_name=f"{customer_name}_Insurance_Report.pdf",
-        mime="application/pdf")
-
+        mime="application/pdf"
+    )
