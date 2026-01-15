@@ -1,9 +1,10 @@
 streamlit
 pandas
 numpy
-scikit-learn    
+scikit-learn
 imbalanced-learn
 matplotlib
-seaborn 
+seaborn
 joblib
 fpdf
+cloudpickle
