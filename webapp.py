@@ -6,7 +6,7 @@ import streamlit as st
 import pandas as pd
 import joblib
 from fpdf import FPDF
-from io import BytesIO
+from datetime import datetime
 
 # ----------------------------
 # Load saved artifacts
@@ -25,7 +25,7 @@ model, model_columns = load_artifacts()
 st.markdown(
     """
     <div style="text-align:center;">
-        <h1>Sahakar Insurance PVT. Ltd</h1>
+        <h1>Sahakar Insurance Pvt. Ltd.</h1>
         <h4>Insurance Eligibility Prediction System</h4>
         <hr>
     </div>
@@ -75,13 +75,13 @@ if submit:
         st.warning("Please enter customer name.")
         st.stop()
 
-    # -------- Feature Engineering --------
+    # ---- Feature Engineering ----
     income_premium_ratio = income / (premium + 1)
     claim_frequency = claims_count / (tenure + 1)
     chronic_num = 1 if chronic == "Yes" else 0
     risk_score = 0.4 * age + 0.3 * bmi + 30 * chronic_num
 
-    # -------- Base Features --------
+    # ---- Base Features ----
     data = {
         "Age": age,
         "Dependents": dependents,
@@ -98,12 +98,11 @@ if submit:
         "Risk_Score": risk_score,
     }
 
-    # -------- Initialize all columns --------
+    # ---- Initialize all columns ----
     for col in model_columns:
-        if col not in data:
-            data[col] = 0
+        data.setdefault(col, 0)
 
-    # -------- One-Hot Encoding --------
+    # ---- One-Hot Encoding ----
     if gender == "Male":
         data["Gender_Male"] = 1
 
@@ -129,13 +128,12 @@ if submit:
     if exercise == "Regular":
         data["Exercise_Regular"] = 1
 
-    # -------- Final DataFrame --------
+    # ---- Final DataFrame ----
     X = pd.DataFrame([data])[model_columns]
 
-    # -------- Prediction --------
+    # ---- Prediction ----
     prediction = model.predict(X)[0]
     proba = model.predict_proba(X)[0][1]
-
     result = "Approved" if prediction == 1 else "Rejected"
 
     # ----------------------------
@@ -152,30 +150,52 @@ if submit:
     st.write(f"**Risk Score:** {risk_score:.2f}")
 
     # ----------------------------
-    # Generate PDF
+    # Professional PDF
     # ----------------------------
-   # ----------------------------
-# Generate PDF
-# ----------------------------
-pdf = FPDF()
-pdf.add_page()
-pdf.set_font("Arial", "B", 16)
-pdf.cell(0, 10, "Insurance Eligibility Report", ln=True, align="C")
+    class InsurancePDF(FPDF):
+        def header(self):
+            self.set_font("Arial", "B", 18)
+            self.cell(0, 10, "Sahakar Insurance Pvt. Ltd.", ln=True, align="C")
+            self.set_font("Arial", "", 12)
+            self.cell(0, 8, "Insurance Eligibility Assessment Report", ln=True, align="C")
+            self.ln(5)
+            self.line(10, self.get_y(), 200, self.get_y())
+            self.ln(10)
 
-pdf.set_font("Arial", "", 12)
-pdf.ln(5)
-pdf.cell(0, 8, f"Customer Name: {customer_name}", ln=True)
-pdf.cell(0, 8, f"Status: {result}", ln=True)
-pdf.cell(0, 8, f"Approval Probability: {proba*100:.2f}%", ln=True)
-pdf.cell(0, 8, f"Risk Score: {risk_score:.2f}", ln=True)
+        def footer(self):
+            self.set_y(-15)
+            self.set_font("Arial", "I", 9)
+            self.cell(
+                0,
+                10,
+                f"Generated on {datetime.now().strftime('%d %b %Y | %H:%M')}",
+                align="C"
+            )
 
-# ✅ Correct Streamlit-compatible PDF bytes
-pdf_bytes = pdf.output(dest="S").encode("latin-1")
+    pdf = InsurancePDF()
+    pdf.add_page()
 
-st.download_button(
-    "Download PDF Report",
-    data=pdf_bytes,
-    file_name=f"{customer_name}_Insurance_Report.pdf",
-    mime="application/pdf"
-)
+    pdf.set_font("Arial", "B", 13)
+    pdf.cell(0, 10, "Customer Details", ln=True)
 
+    pdf.set_font("Arial", "", 11)
+    pdf.cell(60, 8, "Customer Name:", 0)
+    pdf.cell(0, 8, customer_name, ln=True)
+
+    pdf.cell(60, 8, "Policy Type:", 0)
+    pdf.cell(0, 8, policy_type, ln=True)
+
+    pdf.cell(60, 8, "Insurance Status:", 0)
+    pdf.cell(0, 8, result, ln=True)
+
+    pdf.cell(60, 8, "Approval Probability:", 0)
+    pdf.cell(0, 8, f"{proba*100:.2f} %", ln=True)
+
+    pdf_bytes = pdf.output(dest="S").encode("latin-1")
+
+    st.download_button(
+        "📄 Download Professional PDF Report",
+        data=pdf_bytes,
+        file_name=f"{customer_name}_Insurance_Report.pdf",
+        mime="application/pdf"
+    )
