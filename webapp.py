@@ -11,9 +11,13 @@ from io import BytesIO
 # ----------------------------
 # Load saved artifacts
 # ----------------------------
-model = joblib.load("insurance_model.pkl")
-model_columns = joblib.load("model_columns.pkl")
-label_encoder = joblib.load("categorical_encoder.pkl")
+@st.cache_resource
+def load_artifacts():
+    model = joblib.load("insurance_model.pkl")
+    columns = joblib.load("model_columns.pkl")
+    return model, columns
+
+model, model_columns = load_artifacts()
 
 # ----------------------------
 # App Branding
@@ -77,7 +81,7 @@ if submit:
     chronic_num = 1 if chronic == "Yes" else 0
     risk_score = 0.4 * age + 0.3 * bmi + 30 * chronic_num
 
-    # -------- Create feature dict --------
+    # -------- Base Features --------
     data = {
         "Age": age,
         "Dependents": dependents,
@@ -94,11 +98,12 @@ if submit:
         "Risk_Score": risk_score,
     }
 
-    # -------- One-Hot Encoding --------
+    # -------- Initialize all columns --------
     for col in model_columns:
         if col not in data:
             data[col] = 0
 
+    # -------- One-Hot Encoding --------
     if gender == "Male":
         data["Gender_Male"] = 1
 
@@ -112,21 +117,15 @@ if submit:
     elif location == "Semi-Urban":
         data["Location_Semi-Urban"] = 1
 
-    if profession:
-        data[f"Profession_{profession}"] = 1
-
-    if policy_type:
-        data[f"Policy_Type_{policy_type}"] = 1
+    data[f"Profession_{profession}"] = 1
+    data[f"Policy_Type_{policy_type}"] = 1
 
     if smoking == "Smoker":
         data["Smoking_Status_Smoker"] = 1
-
     if chronic == "Yes":
         data["Chronic_Condition_Yes"] = 1
-
     if alcohol == "Yes":
         data["Alcohol_Consumption_Yes"] = 1
-
     if exercise == "Regular":
         data["Exercise_Regular"] = 1
 
@@ -134,21 +133,17 @@ if submit:
     X = pd.DataFrame([data])[model_columns]
 
     # -------- Prediction --------
+    prediction = model.predict(X)[0]
     proba = model.predict_proba(X)[0][1]
-    prediction = model_pipeline.predict(input_df)[0]
-    prediction_proba = model_pipeline.predict_proba(input_df)[0][1]
-    result = "Approved" if prediction == 1 else "Rejected"
 
-    st.success(f"Insurance Status: {result}")
-    st.write(f"Approval Probability: {prediction_proba*100:.2f}%")
-    
+    result = "Approved" if prediction == 1 else "Rejected"
 
     # ----------------------------
     # Display Result
     # ----------------------------
     st.subheader("Prediction Result")
 
-    if result.lower() == "approved":
+    if prediction == 1:
         st.success(f"Insurance Approved ✅ ({proba*100:.2f}%)")
     else:
         st.error(f"Insurance Rejected ❌ ({proba*100:.2f}%)")
