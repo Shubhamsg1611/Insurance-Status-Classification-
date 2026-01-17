@@ -118,5 +118,5 @@ The Streamlit app allows users to:
 ## 👤 Author
 
 **Shubham S Ghanwat**  
-***MBA – Data Science & Business Analytics***  
+****MBA – Data Science & Business Analytics****  
 ****Aspiring Data Scientist | Machine Learning | AI****  
