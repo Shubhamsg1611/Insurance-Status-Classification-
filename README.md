@@ -1,127 +1,122 @@
-# Insurance Eligibility Prediction System
+# 🏦 Insurance Eligibility Prediction System
 
-A complete end-to-end Machine Learning project that predicts whether an insurance application will be **Approved or Rejected** based on customer demographics, financial profile, health indicators, and policy details.  
-The project includes data preprocessing, feature engineering, model training, and a **Streamlit web application with professional PDF report generation**.
+An **end-to-end Machine Learning application** that predicts whether an insurance application will be **Approved or Rejected** based on customer demographics, financial profile, health indicators, and policy details.
 
----
+The project covers **data preprocessing → feature engineering → model training → deployment**, and is delivered through a **Streamlit web application with professional PDF report generation**.
 
-## Project Overview
-
-Insurance companies need fast, accurate, and consistent decisions while evaluating customer eligibility.  
-This system uses a Machine Learning classification model to automate that process and provide:
-
-- Insurance approval prediction
-- Approval probability score
-- Risk assessment score
-- Downloadable professional PDF report
+🔗 **Live App:** https://sahkar-insurance.streamlit.app/
 
 ---
 
-## Machine Learning Pipeline
+## 🚀 Project Overview
 
-### Data Preprocessing
+Insurance underwriting requires fast, accurate, and consistent decision-making.  
+Manual evaluation is time-consuming and prone to inconsistency.
+
+This system automates insurance eligibility decisions by:
+- Standardizing risk evaluation
+- Providing probability-based confidence scores
+- Generating professional customer reports
+
+---
+
+## 🧠 Machine Learning Pipeline
+
+### 🔹 Data Preprocessing
 - Missing value handling
 - Categorical encoding
 - Feature scaling
 - Class imbalance handling using **ADASYN**
 
-### Feature Engineering
+### 🔹 Feature Engineering
 - Income–Premium Ratio  
 - Claim Frequency  
 - Chronic Condition Indicator  
-- Risk Score (custom weighted formula)
+- Custom Risk Score (weighted formulation)
 
-### Model Used
+### 🔹 Model Used
 - **HistGradientBoostingClassifier**
-- Optimized for tabular insurance data
+- Optimized for tabular insurance datasets
 
 ---
 
-## Input Features
+## 📊 Input Features
 
-### 🔹 Demographic
-- Age
-- Gender
-- Marital Status
-- Dependents
-- Location
+### 👤 Demographic
+- Age  
+- Gender  
+- Marital Status  
+- Dependents  
+- Location  
 
-### 🔹 Financial
-- Annual Income
-- Existing Savings
-- Premium Amount
-- Policy Tenure
+### 💰 Financial
+- Annual Income  
+- Existing Savings  
+- Premium Amount  
+- Policy Tenure  
 
-### 🔹 Health & Lifestyle
-- BMI
-- Smoking Status
-- Alcohol Consumption
-- Exercise Habits
-- Chronic Conditions
+### 🏥 Health & Lifestyle
+- BMI  
+- Smoking Status  
+- Alcohol Consumption  
+- Exercise Habits  
+- Chronic Conditions  
 
-### 🔹 Policy History
-- Claims Count
-- Past Claims Amount
-- Policy Type
-- Profession
+### 📁 Policy History
+- Claims Count  
+- Past Claims Amount  
+- Policy Type  
+- Profession  
 
 ---
 
-## Streamlit Web Application
+## 🌐 Streamlit Web Application
 
 The Streamlit app allows users to:
-- Enter customer details
-- Predict insurance eligibility
-- View approval probability
-- Generate and download a professional PDF report
+- Enter customer details interactively  
+- Predict insurance eligibility in real time  
+- View approval probability  
+- Assess risk score  
+- Generate and download a professional PDF report  
 
 ---
 
-## Requirements
-
-- Python 3.8+
-- streamlit
-- pandas
-- numpy
-- scikit-learn
-- imbalanced-learn
-- matplotlib
-- seaborn
-- joblib
-- fpdf
-- cloudpickle
+## 📄 PDF Report Includes
+- Customer Name  
+- Policy Type  
+- Insurance Status (Approved / Rejected)  
+- Approval Probability  
+- Risk Score  
+- Report Generation Timestamp  
 
 ---
 
-## Model Output
+## 📦 Requirements
 
-- Prediction: Approved / Rejected
-- Approval Probability: Confidence score
-- Risk Score: Health & financial risk indicator
+- Python 3.8+  
+- streamlit  
+- pandas  
+- numpy  
+- scikit-learn  
+- imbalanced-learn  
+- matplotlib  
+- seaborn  
+- joblib  
+- fpdf  
+- cloudpickle  
 
 ---
 
-## PDF Report Includes
+## 🎯 Use Cases
+- Insurance underwriting automation  
+- Risk assessment systems  
+- Decision support tools  
+- End-to-end Machine Learning portfolio project  
 
-- Customer Name
-- Policy Type
-- Insurance Status
-- Approval Probability
-- Generation Timestamp
-- Company Branding
--------
-## Use Cases
+---
 
-- Insurance underwriting automation
-- Risk assessment systems
-- Decision support tools
-- Machine learning portfolio project
-----
+## 👤 Author
 
-## Author
-
-Shubham S Ghanwat
-
-MBA – Data Science & Business Analytics
-
-Aspiring Data Scientist | Machine Learning | AI
+**Shubham S Ghanwat**  
+***MBA – Data Science & Business Analytics***  
+****Aspiring Data Scientist | Machine Learning | AI****  
